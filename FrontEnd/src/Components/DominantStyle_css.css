@@ -1,0 +1,269 @@
+:root {
+    --bg-card: #ffffff;
+    --text-main: #1e293b;
+    --text-sub: #64748b;
+    --accent: #6366f1;
+
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+
+/* ===== CONTAINER ===== */
+.ds-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1rem;
+
+    opacity: 0;
+    transform: translateY(12px);
+
+    transition:
+        opacity 0.6s var(--ease),
+        transform 0.6s var(--ease);
+
+    will-change: opacity, transform;
+}
+
+.ds-container.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== CARD ===== */
+.ds-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid #eef2f6;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+    transition:
+        transform 0.35s var(--ease),
+        box-shadow 0.35s var(--ease);
+
+    will-change: transform;
+}
+
+.ds-card-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.ds-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== GRID ===== */
+.ds-grid-top {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.5rem;
+}
+
+/* ===== DOMINANT STYLE ===== */
+.ds-main-style {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.ds-title {
+    font-size: 2rem;
+    color: var(--text-main);
+    margin: 0.5rem 0;
+
+    transition: transform 0.3s var(--ease);
+}
+
+.ds-card:hover .ds-title {
+    transform: translateY(-2px);
+}
+
+.ds-label {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+/* ===== PROGRESS CIRCLE ===== */
+.ds-progress-circle {
+    width: 120px;
+}
+
+.circular-chart {
+    display: block;
+    margin: 10px auto;
+    max-width: 100%;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #f1f5f9;
+    stroke-width: 3;
+}
+
+.circle {
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+
+    stroke-dasharray: 0, 100;
+    animation: circleFill 1.2s var(--ease) forwards;
+
+    will-change: stroke-dasharray;
+}
+
+@keyframes circleFill {
+    to {
+        stroke-dasharray: var(--value, 75), 100;
+    }
+}
+
+.percentage {
+    fill: #1e293b;
+    font-family: sans-serif;
+    font-size: 0.5rem;
+    font-weight: 800;
+    text-anchor: middle;
+
+    opacity: 0;
+    transform: translateY(4px);
+
+    animation: fadeUp 0.6s var(--ease) forwards 0.4s;
+}
+
+/* ===== INSIGHT CARD ===== */
+.ds-insight {
+    display: flex;
+    gap: 1rem;
+    background: #1e1b4b;
+    color: white;
+
+    transition: transform 0.35s var(--ease);
+}
+
+.ds-insight:hover {
+    transform: translateY(-4px) scale(1.01);
+}
+
+.ds-insight h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #a5b4fc;
+}
+
+.ds-insight p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.ds-tag {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    font-size: 0.75rem;
+
+    transition: transform 0.25s var(--ease);
+}
+
+.ds-tag:hover {
+    transform: scale(1.05);
+}
+
+/* ===== PERFORMANCE ===== */
+.ds-perf-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(1, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.ds-perf-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 0.25rem;
+}
+
+/* Bars */
+.ds-bar-track {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.ds-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+
+    transform: scaleX(0);
+    transform-origin: left;
+
+    animation: barGrow 0.9s var(--ease) forwards;
+
+    will-change: transform;
+}
+
+@keyframes barGrow {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* ===== STATUS BADGE ===== */
+.ds-status-badge {
+    padding: 4px 12px;
+    width: 80px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    transition: transform 0.25s var(--ease);
+}
+
+.ds-status-badge:hover {
+    transform: scale(1.05);
+}
+
+.ds-status-badge[data-status="Improving"] {
+    padding: 4px 9px;
+    background: #dcfce7;
+    color: #166534;
+    height: 30px;
+}
+
+.ds-status-badge[data-status="Declining"] {
+    background: #fee2e2;
+    color: #991b1b;
+    height: 30px;
+}
+
+/* ===== CHART ===== */
+.ds-chart-wrapper {
+    height: 300px;
+    margin-top: 1rem;
+
+    opacity: 0;
+    transform: translateY(8px);
+
+    animation: fadeUp 0.6s var(--ease) forwards 0.3s;
+}
+
+/* ===== COMMON ANIMATION ===== */
+@keyframes fadeUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

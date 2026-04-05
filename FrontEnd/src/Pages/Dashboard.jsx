@@ -32,7 +32,6 @@ const COLORS = ["#6366f1", "#f43f5e", "#10b981", "#f59e0b", "#3b82f6"];
 const Dashboard = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    // const data = location.state?.data;
 
     const [data, setData] = useState(() => {
         const saved = localStorage.getItem("dashboardData");
@@ -54,7 +53,6 @@ const Dashboard = () => {
         return null;
     }
 
-    /* ─── Chart configs ─── */
     const lineData = {
         labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],
         datasets: Object.keys(data.weekly_data).map((w, i) => ({
@@ -114,7 +112,6 @@ const Dashboard = () => {
     return (
         <DataContext.Provider value={{ data }}>
             <div className="dashboard">
-                {/* Sidebar */}
                 <aside className="sidebar">
                     <div className="sidebar__brand">
                         <svg width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
@@ -183,7 +180,6 @@ const Dashboard = () => {
                     </nav>
                 </aside>
 
-                {/* Main Content */}
                 <main className="main-content">
                     <header className="topbar">
                         <div>

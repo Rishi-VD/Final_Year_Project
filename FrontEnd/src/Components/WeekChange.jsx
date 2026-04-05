@@ -12,11 +12,11 @@ import {
   Filler,
   Legend,
 } from "chart.js";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Filler, Legend);
 
 const WeekChange = () => {
-  // Context nunchi data teeskuntunnam
   const { data } = useOutletContext();
 
   const changeValue = parseFloat(data?.week_change || 0);
@@ -24,16 +24,12 @@ const WeekChange = () => {
   const themeColor = isPositive ? "#10b981" : "#f43f5e";
 
   const { chartData, prediction } = useMemo(() => {
-    // Weekly data values ni extract chestunnam
-    // Multiple datasets unte (e.g. Focus, Intensity), vatini average chesi common trend teestundi
     const keys = Object.keys(data?.weekly_data || {});
     if (keys.length === 0) return { chartData: null, prediction: 0 };
 
-    const rawData = data.weekly_data[keys[0]]; // Primary dataset (usually Focus)
+    const rawData = data.weekly_data[keys[0]];
     const labels = ["6d ago", "5d ago", "4d ago", "3d ago", "2d ago", "1d ago", "Today"];
 
-    // --- SIMPLE LINEAR PREDICTION LOGIC ---
-    // Last 3 days trend ni batti next 2 days ela untayo calculate chestundi
     const last3 = rawData.slice(-3);
     const avgGrowth = (last3[2] - last3[0]) / 2;
     const nextDay = Math.max(0, Math.min(100, Math.round(last3[2] + avgGrowth)));
@@ -62,7 +58,7 @@ const WeekChange = () => {
             label: "AI Prediction",
             data: predictionValues,
             borderColor: themeColor,
-            borderDash: [5, 5], // Dotted line for prediction
+            borderDash: [5, 5],
             backgroundColor: "transparent",
             tension: 0.4,
             pointRadius: 4,
@@ -103,8 +99,6 @@ const WeekChange = () => {
 
   return (
     <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "16px" }}>
-
-      {/* --- TOP STAT CARD --- */}
       <div className="stats" style={{ display: "grid", gridTemplateColumns: "1fr", margin: 0 }}>
         <div className={`stat-card stat-card--change`} style={{ width: "100%", boxSizing: "border-box" }}>
           <div className="stat-card__icon" style={{ background: themeColor + "18", color: themeColor }}>
@@ -124,7 +118,6 @@ const WeekChange = () => {
         </div>
       </div>
 
-      {/* --- MAIN PREDICTION GRAPH --- */}
       <div className="chart-card" style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: "20px", padding: "20px" }}>
         <div className="chart-card__header" style={{ marginBottom: "20px" }}>
           <div>
@@ -143,7 +136,6 @@ const WeekChange = () => {
         </div>
       </div>
 
-      {/* --- INSIGHT FOOTER --- */}
       <div style={{
         background: themeColor + "08",
         border: `1px solid ${themeColor}20`,
@@ -154,7 +146,7 @@ const WeekChange = () => {
         gap: "12px"
       }}>
         <div style={{ minWidth: "40px", height: "40px", borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 4px rgba(0,0,0,0.05)" }}>
-          <span style={{ fontSize: "18px" }}>{isPositive ? "🚀" : "⚠️"}</span>
+          <span style={{ fontSize: "18px" }}>{isPositive ? <TrendingUp size={20} /> : <TrendingDown size={20} />}</span>
         </div>
         <p style={{ margin: 0, fontSize: "14px", color: "#334155", lineHeight: "1.5" }}>
           Based on your <strong>{changeValue}%</strong> {isPositive ? "increase" : "dip"}, we expect your focus to stabilize around <strong>{prediction}%</strong> tomorrow if the current workload remains constant.

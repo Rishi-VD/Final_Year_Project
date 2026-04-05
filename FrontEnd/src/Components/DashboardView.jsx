@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { DataContext } from "../context/DataContext";
 import { Line, Bar } from "react-chartjs-2";
 
@@ -15,6 +15,13 @@ const DashboardView = () => {
 
     const changeValue = parseFloat(data.week_change);
     const changePositive = changeValue >= 0;
+
+    const performanceScores = useMemo(() =>
+        Object.values(data.weekly_data).map(arr =>
+            Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+        ),
+        [data.weekly_data]
+    );
 
     const lineData = {
         labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],
@@ -59,8 +66,6 @@ const DashboardView = () => {
 
     return (
         <>
-
-            {/* Stat Cards */}
             <section className="stats">
                 <div className="stat-card stat-card--focus">
                     <div className="stat-card__icon">
@@ -112,14 +117,13 @@ const DashboardView = () => {
                 </div>
             </section>
 
-            {/* Charts */}
             <section className="charts">
                 <div className="chart-card">
                     <div className="chart-card__header">
                         <h3>Weekly Focus Trend</h3>
                         <span className="chart-card__badge">7 days</span>
                     </div>
-                    <div className="chart-card__body">
+                    <div className="chart-card__body" style={{ height: "300px" }}>
                         <Line data={lineData} options={lineOptions} />
                     </div>
                 </div>
@@ -129,9 +133,58 @@ const DashboardView = () => {
                         <h3>Learning Modality Breakdown</h3>
                         <span className="chart-card__badge">By style</span>
                     </div>
-                    <div className="chart-card__body">
+                    <div className="chart-card__body" style={{ height: "300px" }}>
                         <Bar data={barData} options={barOptions} />
                     </div>
+                </div>
+            </section>
+
+            <section className="chart-card" style={{ marginTop: "20px" }}>
+                <div className="chart-card__header">
+                    <h3 style={{ fontSize: "15px" }}>Weekly Performance Breakdown</h3>
+                </div>
+
+                <div style={{
+                    display: "grid",
+                    gap: "20px",
+                    padding: "12px",
+                    marginLeft: "12px",
+                    paddingBottom: "11px",
+                    maxHeight: "180px",
+                    overflowY: "auto"
+                }}>
+                    {Object.keys(data.weekly_data).map((week, idx) => (
+                        <div key={week}>
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                fontSize: "12px",
+                                marginBottom: "3px"
+                            }}>
+                                <span style={{ color: "#64748b" }}>{week}</span>
+                                <strong style={{ fontSize: "12px" }}>
+                                    {performanceScores[idx]}%
+                                </strong>
+                            </div>
+
+                            <div style={{
+                                height: "6px",
+                                background: "#e2e8f0",
+                                borderRadius: "6px",
+                                overflow: "hidden"
+                            }}>
+                                <div
+                                    style={{
+                                        width: `${performanceScores[idx]}%`,
+                                        height: "100%",
+                                        backgroundColor: COLORS[idx % COLORS.length],
+                                        borderRadius: "6px",
+                                        transition: "width 0.5s ease"
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </section>
         </>

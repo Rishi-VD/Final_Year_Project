@@ -1,5 +1,4 @@
-import { useContext, useMemo } from "react";
-import { DataContext } from "../context/DataContext";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { Line } from "react-chartjs-2";
 import {
     Chart as ChartJS,
@@ -11,6 +10,8 @@ import {
     Legend,
     Filler,
 } from "chart.js";
+import { useOutletContext } from "react-router-dom";
+import "./DominantStyle_css.css";
 
 ChartJS.register(
     CategoryScale,
@@ -22,120 +23,161 @@ ChartJS.register(
     Filler
 );
 
-const COLORS = {
-    Verbal: "#6366f1",
-    Visual: "#f43f5e",
-    Physical: "#10b981",
-    Written: "#f59e0b",
-};
+const WEEK_COLORS = ["#6366f1", "#10b981", "#f59e0b", "#f43f5e"];
 
-const DominantStyle = () => {
-    const { data } = useContext(DataContext);
+function DominantStyle() {
+    const { data } = useOutletContext();
+    const [mounted, setMounted] = useState(false);
 
-    // 🔥 Safe fallback (prevents crash)
-    const modalityData = data?.modality_data || {};
-    const dominant = data?.dominant || "N/A";
+    useEffect(() => {
+        const frame = requestAnimationFrame(() => setMounted(true));
+        return () => cancelAnimationFrame(frame);
+    }, []);
 
-    // 🧠 Convert modality_data → weekly trend (simulate smooth progression)
+    if (!data) return <div className="loading">Loading Analytics...</div>;
+
     const chartData = useMemo(() => {
-        const labels = ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"];
-
-        const datasets = Object.keys(modalityData).map((style) => {
-            const base = modalityData[style];
-
-            // Generate smooth trend (instead of flat boring line)
-            const values = labels.map((_, i) => {
-                const variation = Math.sin(i * 0.8) * 5;
-                return Math.max(0, Math.min(100, base + variation));
-            });
-
-            return {
-                label: style,
-                data: values,
-                borderColor: COLORS[style] || "#3b82f6",
-                backgroundColor: (ctx) => {
-                    const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
-                    gradient.addColorStop(0, (COLORS[style] || "#3b82f6") + "33");
-                    gradient.addColorStop(1, (COLORS[style] || "#3b82f6") + "00");
-                    return gradient;
-                },
-                tension: 0.4,
-                fill: true,
-                borderWidth: style === dominant ? 3 : 2, // highlight dominant
+        const weeks = Object.keys(data.weekly_data);
+        return {
+            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+            datasets: weeks.map((weekKey, idx) => ({
+                label: weekKey,
+                data: data.weekly_data[weekKey],
+                borderColor: WEEK_COLORS[idx % WEEK_COLORS.length],
+                backgroundColor: WEEK_COLORS[idx % WEEK_COLORS.length] + "10",
+                fill: false,
+                tension: 0.35,
                 pointRadius: 3,
-            };
-        });
+                borderWidth: 2,
+                spanGaps: true 
+            })),
+        };
+    }, [data.weekly_data]);
 
-        return { labels, datasets };
-    }, [modalityData, dominant]);
-
-    const options = {
+    const chartOptions = useMemo(() => ({
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+            duration: 400,
+            easing: 'easeOutQuart'
+        },
+        elements: {
+            line: { borderCapStyle: 'round' }
+        },
         plugins: {
             legend: {
-                position: "bottom",
-                labels: {
-                    usePointStyle: true,
-                    padding: 20,
-                    font: { size: 12 },
-                },
+                display: true,
+                position: "top",
+                align: "end",
+                labels: { boxWidth: 8, usePointStyle: true, font: { size: 12, weight: "600" } },
             },
             tooltip: {
+                enabled: true,
                 backgroundColor: "#1e1b4b",
+                usePointStyle: true,
                 padding: 10,
-                cornerRadius: 8,
             },
         },
         scales: {
-            x: {
-                grid: { display: false },
-                ticks: { font: { size: 11 } },
-            },
-            y: {
-                beginAtZero: true,
-                max: 100,
-                grid: { color: "#e2e8f0" },
-                ticks: { font: { size: 11 } },
-            },
+            y: { beginAtZero: true, grid: { color: "#f1f5f9" }, border: { display: false } },
+            x: { grid: { display: false }, border: { display: false } },
         },
-    };
+    }), []);
+
+    const performanceScores = useMemo(() =>
+        Object.values(data.weekly_data).map(arr =>
+            Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+        ),
+        [data.weekly_data]);
+
+    const dominantValue = data.overall_focus;
 
     return (
-        <>
-            {/* TOP CARD (like dashboard stat) */}
-            <section className="stats">
-                <div className="stat-card stat-card--style">
-                    <div className="stat-card__icon">
-                        <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round"
-                                d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
+        <div
+            className={`ds-container ${mounted ? "fade-in" : ""}`}
+            style={{ willChange: 'opacity, transform' }}
+        >
+            <div className="ds-grid-top">
+                <div className="ds-card ds-main-style">
+                    <div className="ds-card-info">
+                        <span className="ds-label">Primary Modality</span>
+                        <h2 className="ds-title">{data.dominant}</h2>
+                        <p className="ds-description">
+                            You process information <b>{data.week_change}%</b> more effectively through{" "}
+                            {data.dominant.toLowerCase()} channels.
+                        </p>
+                    </div>
+
+                    <div className="ds-progress-circle">
+                        <svg viewBox="0 0 36 36" className="circular-chart">
+                            <path className="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path
+                                className="circle"
+                                style={{
+                                    stroke: WEEK_COLORS[0],
+                                    transition: 'stroke-dasharray 0.8s ease-out'
+                                }}
+                                strokeDasharray={`${dominantValue}, 100`}
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <text x="18" y="20.35" className="percentage">{dominantValue}%</text>
                         </svg>
                     </div>
-                    <div className="stat-card__body">
-                        <span className="stat-card__label">Dominant Style</span>
-                        <span className="stat-card__value stat-card__value--text">
-                            {dominant}
-                        </span>
+                </div>
+
+                <div className="ds-card ds-insight">
+                    <div className="ds-insight-icon">💡</div>
+                    <div className="ds-insight-content">
+                        <h3>AI Improvement Insight</h3>
+                        <p>
+                            Based on your <b>{data.status}</b> trend, we recommend focusing on{" "}
+                            {data.dominant === "Visual" ? "mind mapping and flowcharts" : "interactive drills"}
+                            to maintain your current <b>{data.week_change}%</b> growth momentum.
+                        </p>
+                        <div className="ds-tag">Actionable Goal: 45m focused study</div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* CHART (same dashboard feel) */}
-            <section className="charts">
-                <div className="chart-card">
-                    <div className="chart-card__header">
-                        <h3>Weekly Learning Style Trend</h3>
-                        <span className="chart-card__badge">7 Days Analysis</span>
+            <div className="ds-card ds-chart-card">
+                <div className="ds-card-header">
+                    <div>
+                        <h3>Learning Trend</h3>
+                        <p className="ds-sub">Comparative analysis across active weeks</p>
                     </div>
-
-                    <div className="chart-card__body">
-                        <Line data={chartData} options={options} />
-                    </div>
+                    <div className="ds-status-badge" data-status={data.status}>{data.status}</div>
                 </div>
-            </section>
-        </>
+
+                <div className="ds-chart-wrapper" style={{ minHeight: '300px' }}> 
+                    <Line data={chartData} options={chartOptions} redraw={false} />
+                </div>
+            </div>
+
+            <div className="ds-card ds-perf-card">
+                <h3>Weekly Performance Breakdown</h3>
+                <div className="ds-perf-grid">
+                    {Object.keys(data.weekly_data).map((week, idx) => (
+                        <div key={week} className="ds-perf-item">
+                            <div className="ds-perf-info">
+                                <span>{week}</span>
+                                <strong>{performanceScores[idx]}%</strong>
+                            </div>
+                            <div className="ds-bar-track">
+                                <div
+                                    className="ds-bar-fill"
+                                    style={{
+                                        width: `${performanceScores[idx]}%`,
+                                        backgroundColor: WEEK_COLORS[idx % WEEK_COLORS.length],
+                                        transition: `width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) ${idx * 0.1}s`
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
     );
-};
+}
 
-export default DominantStyle;
+export default React.memo(DominantStyle);

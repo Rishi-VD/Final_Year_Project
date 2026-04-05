@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useOutletContext } from "react-router-dom";
 import { Line } from "react-chartjs-2";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -77,18 +78,64 @@ const OverAllFocus = () => {
         },
     };
 
+    const analytics = useMemo(() => {
+        const values = chartDataValues.values;
+
+        const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+
+        const variance =
+            values.reduce((sum, v) => sum + Math.pow(v - avg, 2), 0) / values.length;
+
+        const stability =
+            variance < 50 ? "High" : variance < 150 ? "Moderate" : "Low";
+
+        const trend =
+            values[values.length - 1] > values[0] ? "Improving" : "Declining";
+
+        const attentionSpan =
+            avg > 70 ? "Long" : avg > 40 ? "Moderate" : "Short";
+
+        const intervention =
+            avg < 40 || stability === "Low" ? "Required" : "Minimal";
+
+        return [
+            {
+                label: "FOCUS STABILITY",
+                val: stability,
+                sub: `${Math.round(variance)} variance`,
+                desc: "Consistency of attention over time."
+            },
+            {
+                label: "BEHAVIOR TREND",
+                val: trend,
+                sub: "Temporal change",
+                desc: "Indicates improvement or decline."
+            },
+            {
+                label: "ATTENTION SPAN",
+                val: attentionSpan,
+                sub: `${avg}% avg`,
+                desc: "Duration of sustained engagement."
+            },
+            {
+                label: "INTERVENTION NEED",
+                val: intervention,
+                sub: intervention === "Required" ? "High Priority" : "Stable",
+                desc: "Support requirement based on behavior."
+            }
+        ];
+    }, [chartDataValues]);
+
     return (
         <div style={{
             padding: "16px",
             width: "100%",
-            maxWidth: "1300px",
+            maxWidth: "1600px",
             margin: "0 auto",
             fontFamily: "'Inter', sans-serif",
             color: "#1e293b",
             boxSizing: "border-box"
         }}>
-
-            {/* TOP SECTION: CIRCLE & INSIGHT */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "16px", marginBottom: "16px" }}>
 
                 <div style={{ background: "#fff", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", display: "flex", alignItems: "center", gap: "20px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
@@ -116,7 +163,6 @@ const OverAllFocus = () => {
                 </div>
             </div>
 
-            {/* CHART SECTION */}
             <div style={{ background: "#fff", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", marginBottom: "16px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
                     <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700" }}>Attention Velocity</h3>
@@ -128,27 +174,92 @@ const OverAllFocus = () => {
                         ))}
                     </div>
                 </div>
-                <div style={{ height: "350px" }}> {/* Fixed Height to fit viewport */}
+                <div style={{ height: "350px" }}>
                     <Line data={chartData} options={options} />
                 </div>
             </div>
 
-            {/* ANALYTICS GRID */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-                {[
-                    { label: "CONSISTENCY", val: "High", sub: "+5% Stability", desc: "Focus dips are less frequent." },
-                    { label: "OPTIMAL WINDOW", val: "9:30 AM", sub: "Peak Focus", desc: "Recurring surge in performance." },
-                    { label: "AVG SESSION", val: "52m", sub: "Deep Work", desc: "Correlates with higher scores." }
-                ].map((item, idx) => (
-                    <div key={idx} style={{ background: "#fff", padding: "26px", borderRadius: "16px", border: "1px solid #e2e8f0" }}>
-                        <p style={{ margin: 0, fontSize: "11px", fontWeight: "600", color: "#94a3b8" }}>{item.label}</p>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: "6px", margin: "4px 0" }}>
-                            <span style={{ fontSize: "20px", fontWeight: "800" }}>{item.val}</span>
-                            <span style={{ fontSize: "11px", color: idx === 1 ? "#6366f1" : "#10b981", fontWeight: "600" }}>{item.sub}</span>
-                        </div>
-                        <p style={{ fontSize: "12px", color: "#64748b", margin: 0 }}>{item.desc}</p>
-                    </div>
-                ))}
+            <div style={{
+                background: "#f8fafc",
+                padding: "20px",
+                borderRadius: "16px",
+                border: "1px solid #e2e8f0",
+                display: "flex",
+                alignItems: "center",
+                gap: "14px"
+            }}>
+                {(() => {
+                    const values = chartDataValues.values;
+
+                    const first = values[0];
+                    const last = values[values.length - 1];
+                    const change = last - first;
+
+                    const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+
+                    let status, Icon, color, message;
+
+                    if (change > 5) {
+                        status = "Improving";
+                        Icon = TrendingUp;
+                        color = "#10b981";
+                        message = `Focus is improving by ${change}%. Student shows better engagement and learning consistency.`;
+                    } else if (change < -5) {
+                        status = "Declining";
+                        Icon = TrendingDown;
+                        color = "#ef4444";
+                        message = `Focus is declining by ${Math.abs(change)}%. Possible attention fatigue detected, intervention recommended.`;
+                    } else {
+                        status = "Stable";
+                        Icon = Minus;
+                        color = "#f59e0b";
+                        message = `Focus is relatively stable. Minor fluctuations observed in attention levels.`;
+                    }
+
+                    return (
+                        <>
+                            <div style={{
+                                background: "#fff",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                border: "1px solid #e2e8f0",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                            }}>
+                                <Icon size={22} color={color} />
+                            </div>
+
+                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                <p style={{
+                                    margin: 0,
+                                    fontSize: "13px",
+                                    fontWeight: "700",
+                                    color: color
+                                }}>
+                                    {status} Behavior
+                                </p>
+
+                                <p style={{
+                                    margin: "4px 0 0",
+                                    fontSize: "13px",
+                                    lineHeight: "1.5",
+                                    color: "#334155"
+                                }}>
+                                    {message}
+                                </p>
+
+                                <p style={{
+                                    margin: "6px 0 0",
+                                    fontSize: "11px",
+                                    color: "#64748b"
+                                }}>
+                                    Avg Focus: <strong>{avg}%</strong>
+                                </p>
+                            </div>
+                        </>
+                    );
+                })()}
             </div>
         </div>
     );
