@@ -4,6 +4,7 @@ import { Line, Bar } from "react-chartjs-2";
 
 const DashboardView = () => {
     const { data } = useContext(DataContext);
+    if (!data) return <div style={{ padding: "20px" }}>Upload CSV first!</div>;
     const COLORS = ["#6366f1", "#f43f5e", "#10b981", "#f59e0b", "#3b82f6"];
 
     const statusColor =

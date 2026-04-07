@@ -1,4 +1,6 @@
 import Dashboard from "./Pages/Dashboard";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Home from "./Pages/Home";
 import OverallFocus from "./Components/OverAllFocus";
 import WeekChange from "./Components/WeekChange";
@@ -9,19 +11,23 @@ import DashboardView from "./Components/DashboardView";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/dashboard" element={<Dashboard />}>
+    <>
+      <ToastContainer position="top-right" autoClose={3000} />
+      <Routes>
 
-        <Route index element={<DashboardView />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />}>
 
-        <Route path="overall-focus" element={<OverallFocus />} />
-        <Route path="week-change" element={<WeekChange />} />
-        <Route path="dominant-style" element={<DominantStyle />} />
-        <Route path="status" element={<Status />} />
+          <Route index element={<DashboardView />} />
 
-      </Route>
-    </Routes>
+          <Route path="overall-focus" element={<OverallFocus />} />
+          <Route path="week-change" element={<WeekChange />} />
+          <Route path="dominant-style" element={<DominantStyle />} />
+          <Route path="status" element={<Status />} />
+
+        </Route>
+      </Routes>
+    </>
   );
 }
 

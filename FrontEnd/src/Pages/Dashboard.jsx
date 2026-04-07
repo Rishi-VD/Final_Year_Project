@@ -48,14 +48,18 @@ const Dashboard = () => {
         }
     }, [location.state]);
 
-    if (!data) {
-        navigate("/");
-        return null;
+    if (!data || !data.weekly_data || !data.modality_data) {
+        return (
+            <div style={{ textAlign: "center", marginTop: "50px" }}>
+                <h2>No data available. Please upload a CSV first.</h2>
+                <button onClick={() => navigate("/")}>Go to Upload</button>
+            </div>
+        );
     }
 
     const lineData = {
         labels: ["Day 1", "Day 2", "Day 3", "Day 4", "Day 5", "Day 6", "Day 7"],
-        datasets: Object.keys(data.weekly_data).map((w, i) => ({
+        datasets: Object.keys(data?.weekly_data || {}).map((w, i) => ({
             label: w,
             data: data.weekly_data[w],
             borderColor: COLORS[i % COLORS.length],
@@ -82,7 +86,7 @@ const Dashboard = () => {
 
     const barData = {
         labels: ["Verbal", "Visual", "Physical", "Written"],
-        datasets: Object.keys(data.modality_data).map((w, i) => ({
+        datasets: Object.keys(data?.modality_data || {}).map((w, i) => ({
             label: w,
             data: data.modality_data[w],
             backgroundColor: COLORS[i % COLORS.length],
@@ -110,7 +114,7 @@ const Dashboard = () => {
 
     /* ─── Dashboard ─── */
     return (
-        <DataContext.Provider value={{ data }}>
+        <DataContext.Provider value={{ data, setData }}>
             <div className="dashboard">
                 <aside className="sidebar">
                     <div className="sidebar__brand">
@@ -194,7 +198,7 @@ const Dashboard = () => {
                         </div>
                     </header>
 
-                    <main className="main-content">
+                    <main className="dashboard__outlet">
                         <Outlet context={{ data }} />
                     </main>
                 </main>
