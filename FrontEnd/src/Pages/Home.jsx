@@ -101,7 +101,7 @@ const Home = () => {
                     formData.append("file", blob, file.name);
 
                     const res = await axios.post(
-                        "http://127.0.0.1:5000/upload",
+                        "https://final-year-project-backend-beta.vercel.app/upload",
                         formData,
                         { headers: { "Content-Type": "multipart/form-data" } }
                     );
